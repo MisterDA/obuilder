@@ -38,14 +38,18 @@ let rec await t expect =
   let got = Buffer.contents t.buf |> remove_notes in
   if got = expect then Lwt.return_unit
   else if String.length got > String.length expect then (
-    Fmt.failwith "Log expected %S but got %S" expect got
+    let msg = Fmt.str "[FAIL] Log expected %S but got %S" expect got in
+    prerr_endline msg;        (* for Windows ;) *)
+    failwith msg
   ) else (
     let common = min (String.length expect) (String.length got) in
     if String.sub got 0 common = String.sub expect 0 common then (
       Lwt_condition.wait t.cond >>= fun () ->
       await t expect
     ) else (
-      Fmt.failwith "Log expected %S but got %S" expect got
+      let msg = Fmt.str "[FAIL] Log expected %S but got %S" expect got in
+      prerr_endline msg;        (* for Windows ;) *)
+      failwith msg
     )
   )
 
